@@ -1,0 +1,111 @@
+Namespace(root='/data/office-home/', data='OfficeHome', domain=['Cl'], val_ratio=0.0, train_resizing='ran.crop', val_resizing='default', resize_size=224, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=(0.485, 0.456, 0.406), norm_std=(0.229, 0.224, 0.225), arch='resnet50', bottleneck_dim=256, no_pool=False, wn=False, scratch=False, load='./shot_Ar/checkpoints/best.pth', batch_size=64, lr=0.01, lr_gamma=10, lr_decay=0.75, momentum=0.9, weight_decay=0.001, epsilon=1e-05, lb_smooth=0.1, trade_off=0.0, workers=8, epochs=15, print_freq=10, seed=None, per_class_eval=False, log='./shot_Ar_Cl/', phase='train_target')
+train_transform:  Compose(
+    Compose(
+    ResizeImage(size=(256, 256))
+    RandomCrop(size=(224, 224), padding=None)
+)
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+val_transform:  Compose(
+    Compose(
+    ResizeImage(size=(256, 256))
+    CenterCrop(size=(224, 224))
+)
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+=> using model 'resnet50'
+/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torchvision/models/_utils.py:252: UserWarning: Accessing the model URLs via the internal dictionary of the module is deprecated since 0.13 and will be removed in 0.15. Please access them via the appropriate Weights Enum instead.
+  warnings.warn(
+lr: 0.01
+Epoch: [0][ 0/69]	Time  2.17 ( 2.17)	Data  1.02 ( 1.02)	Loss   2.85 (  2.85)
+Epoch: [0][10/69]	Time  0.24 ( 0.41)	Data  0.09 ( 0.17)	Loss   2.70 (  2.85)
+Epoch: [0][20/69]	Time  0.25 ( 0.33)	Data  0.10 ( 0.13)	Loss   2.21 (  2.67)
+Epoch: [0][30/69]	Time  0.25 ( 0.31)	Data  0.09 ( 0.12)	Loss   2.31 (  2.54)
+Epoch: [0][40/69]	Time  0.25 ( 0.29)	Data  0.09 ( 0.11)	Loss   2.05 (  2.44)
+Epoch: [0][50/69]	Time  0.25 ( 0.28)	Data  0.09 ( 0.11)	Loss   1.95 (  2.35)
+Epoch: [0][60/69]	Time  0.25 ( 0.28)	Data  0.09 ( 0.11)	Loss   2.06 (  2.28)
+Test: [ 0/69]	Time  1.080 ( 1.080)	Loss 3.3971e+00 (3.3971e+00)	Acc@1  25.00 ( 25.00)
+Test: [10/69]	Time  0.087 ( 0.177)	Loss 1.2679e+00 (2.1818e+00)	Acc@1  73.44 ( 50.71)
+Test: [20/69]	Time  0.082 ( 0.133)	Loss 4.9179e-01 (2.2378e+00)	Acc@1  90.62 ( 49.78)
+Test: [30/69]	Time  0.084 ( 0.117)	Loss 1.7068e+00 (2.3671e+00)	Acc@1  50.00 ( 47.68)
+Test: [40/69]	Time  0.096 ( 0.110)	Loss 1.7519e+00 (2.3401e+00)	Acc@1  65.62 ( 48.02)
+Test: [50/69]	Time  0.088 ( 0.105)	Loss 1.3292e+00 (2.3969e+00)	Acc@1  65.62 ( 48.28)
+Test: [60/69]	Time  0.084 ( 0.102)	Loss 2.7556e+00 (2.3478e+00)	Acc@1  32.81 ( 49.36)
+ * Acc@1 48.408
+lr: 0.006817316198804997
+Exception ignored in: <function _releaseLock at 0x7f2962641790>
+Traceback (most recent call last):
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/logging/__init__.py", line 227, in _releaseLock
+    def _releaseLock():
+KeyboardInterrupt: 
+Traceback (most recent call last):
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 353, in <module>
+    main(args)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 127, in main
+    train_target(train_loader, classifier, optimizer, lr_scheduler, epoch, args)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 243, in train_target
+    pesudo_labels = collect_pseudo_labels(train_loader, model, args)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 153, in collect_pseudo_labels
+    for data, index in train_loader:
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 444, in __iter__
+    return self._get_iterator()
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 390, in _get_iterator
+    return _MultiProcessingDataLoaderIter(self)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1077, in __init__
+    w.start()
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/multiprocessing/process.py", line 121, in start
+    self._popen = self._Popen(self)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/multiprocessing/context.py", line 224, in _Popen
+    return _default_context.get_context().Process._Popen(process_obj)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/multiprocessing/context.py", line 277, in _Popen
+    return Popen(process_obj)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/multiprocessing/popen_fork.py", line 19, in __init__
+    self._launch(process_obj)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/multiprocessing/popen_fork.py", line 66, in _launch
+    self.pid = os.fork()
+KeyboardInterrupt
+Error in atexit._run_exitfuncs:
+Traceback (most recent call last):
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/multiprocessing/util.py", line 357, in _exit_function
+    p.join()
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/multiprocessing/process.py", line 147, in join
+    assert self._parent_pid == os.getpid(), 'can only join a child process'
+AssertionError: can only join a child process
+Traceback (most recent call last):
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 353, in <module>
+    main(args)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 127, in main
+    train_target(train_loader, classifier, optimizer, lr_scheduler, epoch, args)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 243, in train_target
+    pesudo_labels = collect_pseudo_labels(train_loader, model, args)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 153, in collect_pseudo_labels
+    for data, index in train_loader:
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 681, in __next__
+    data = self._next_data()
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1359, in _next_data
+    idx, data = self._get_data()
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1325, in _get_data
+    success, data = self._try_get_data()
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1163, in _try_get_data
+    data = self._data_queue.get(timeout=timeout)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/multiprocessing/queues.py", line 113, in get
+    if not self._poll(timeout):
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/multiprocessing/connection.py", line 262, in poll
+    return self._poll(timeout)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/multiprocessing/connection.py", line 429, in _poll
+    r = wait([self], timeout)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/multiprocessing/connection.py", line 936, in wait
+    ready = selector.select(timeout)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/selectors.py", line 416, in select
+    fd_event_list = self._selector.poll(timeout)
+KeyboardInterrupt
+Error in atexit._run_exitfuncs:
+Traceback (most recent call last):
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/multiprocessing/popen_fork.py", line 27, in poll
+    pid, sts = os.waitpid(self.pid, flag)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/utils/data/_utils/signal_handling.py", line 66, in handler
+    _error_if_any_worker_fails()
+RuntimeError: DataLoader worker (pid 2405427) is killed by signal: Interrupt. 

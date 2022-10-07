@@ -1,0 +1,119 @@
+Namespace(root='/data/office-home/', data='OfficeHome', domain=['Cl'], val_ratio=0.0, train_resizing='ran.crop', val_resizing='default', resize_size=224, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=(0.485, 0.456, 0.406), norm_std=(0.229, 0.224, 0.225), arch='resnet50', bottleneck_dim=256, no_pool=False, wn=False, scratch=False, load='./shot_Ar/checkpoints/best.pth', batch_size=64, lr=0.01, lr_gamma=10, lr_decay=0.75, momentum=0.9, weight_decay=0.001, epsilon=1e-05, lb_smooth=0.1, trade_off=0.0, workers=8, epochs=15, print_freq=10, seed=None, per_class_eval=False, log='./shot_Ar_Cl/', phase='train_target')
+train_transform:  Compose(
+    Compose(
+    ResizeImage(size=(256, 256))
+    RandomCrop(size=(224, 224), padding=None)
+)
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+val_transform:  Compose(
+    Compose(
+    ResizeImage(size=(256, 256))
+    CenterCrop(size=(224, 224))
+)
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+=> using model 'resnet50'
+/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torchvision/models/_utils.py:252: UserWarning: Accessing the model URLs via the internal dictionary of the module is deprecated since 0.13 and will be removed in 0.15. Please access them via the appropriate Weights Enum instead.
+  warnings.warn(
+lr: 0.01
+2.712629795074463 0.09796667098999023
+/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/optim/lr_scheduler.py:131: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn("Detected call of `lr_scheduler.step()` before `optimizer.step()`. "
+Epoch: [0][ 0/69]	Time  2.15 ( 2.15)	Data  0.98 ( 0.98)	Loss   2.81 (  2.81)
+2.829181671142578 0.07285165786743164
+2.8972058296203613 0.07175302505493164
+2.745368480682373 0.0905766487121582
+2.8121232986450195 0.08805036544799805
+2.673945903778076 0.10781335830688477
+2.5617868900299072 0.11673545837402344
+2.3025922775268555 0.12387704849243164
+2.636758804321289 0.11123418807983398
+2.7761106491088867 0.09934663772583008
+2.279775619506836 0.16771173477172852
+Epoch: [0][10/69]	Time  0.24 ( 0.41)	Data  0.09 ( 0.17)	Loss   2.45 (  2.76)
+2.444164276123047 0.13922643661499023
+2.4229965209960938 0.13448381423950195
+2.3551218509674072 0.15843534469604492
+2.4614803791046143 0.13832950592041016
+2.2853825092315674 0.18059730529785156
+2.0963711738586426 0.19614696502685547
+1.9985268115997314 0.182816743850708
+2.1303272247314453 0.16772794723510742
+2.396394729614258 0.09995555877685547
+2.178619384765625 0.1733555793762207
+Epoch: [0][20/69]	Time  0.24 ( 0.33)	Data  0.09 ( 0.13)	Loss   2.35 (  2.61)
+2.2120308876037598 0.16992521286010742
+2.0524330139160156 0.2026352882385254
+2.075456142425537 0.2104041576385498
+2.080775499343872 0.17249536514282227
+1.9780199527740479 0.239088773727417
+1.9826773405075073 0.22467899322509766
+1.8769264221191406 0.27410221099853516
+2.074859619140625 0.17664623260498047
+2.0460357666015625 0.22271370887756348
+1.9046502113342285 0.25859689712524414
+Epoch: [0][30/69]	Time  0.24 ( 0.30)	Data  0.09 ( 0.12)	Loss   2.16 (  2.49)
+2.0154237747192383 0.2003798484802246
+1.8205435276031494 0.30040884017944336
+1.818666934967041 0.30313873291015625
+2.0639100074768066 0.20603036880493164
+1.9931764602661133 0.21303129196166992
+2.0446128845214844 0.20148539543151855
+1.7872586250305176 0.24118614196777344
+1.799239158630371 0.28266477584838867
+1.7950983047485352 0.23196887969970703
+1.684213638305664 0.24710440635681152
+Epoch: [0][40/69]	Time  0.25 ( 0.29)	Data  0.09 ( 0.11)	Loss   1.93 (  2.40)
+1.9114702939987183 0.17738819122314453
+1.8728053569793701 0.3107783794403076
+1.7697105407714844 0.2699260711669922
+1.8009449243545532 0.21592211723327637
+1.7851274013519287 0.20287513732910156
+1.631152629852295 0.3243978023529053
+1.865687370300293 0.18105411529541016
+1.5757132768630981 0.2987682819366455
+1.9922536611557007 0.22109484672546387
+1.90032958984375 0.25190258026123047
+Epoch: [0][50/69]	Time  0.25 ( 0.28)	Data  0.09 ( 0.11)	Loss   2.15 (  2.33)
+1.6779239177703857 0.24063539505004883
+1.675365924835205 0.30794429779052734
+1.5734877586364746 0.38567686080932617
+1.728112816810608 0.2962663173675537
+1.8773603439331055 0.23926496505737305
+1.6448700428009033 0.23621702194213867
+1.7742681503295898 0.3011436462402344
+1.5548216104507446 0.30580997467041016
+1.6507608890533447 0.337613582611084
+1.6855108737945557 0.2856755256652832
+Epoch: [0][60/69]	Time  0.24 ( 0.27)	Data  0.09 ( 0.11)	Loss   1.97 (  2.27)
+1.6132876873016357 0.35420751571655273
+1.6256953477859497 0.322873592376709
+1.6935443878173828 0.2747161388397217
+1.5268816947937012 0.3269345760345459
+1.6339757442474365 0.31175899505615234
+1.5201985836029053 0.33046770095825195
+1.5090796947479248 0.3010060787200928
+1.6745342016220093 0.6717758178710938
+Test: [ 0/69]	Time  1.094 ( 1.094)	Loss 2.8714e+00 (2.8714e+00)	Acc@1  26.56 ( 26.56)
+Test: [10/69]	Time  0.079 ( 0.173)	Loss 1.1642e+00 (2.1799e+00)	Acc@1  73.44 ( 50.00)
+Test: [20/69]	Time  0.082 ( 0.130)	Loss 4.6738e-01 (2.3021e+00)	Acc@1  90.62 ( 47.54)
+Test: [30/69]	Time  0.084 ( 0.115)	Loss 1.3517e+00 (2.4002e+00)	Acc@1  73.44 ( 47.48)
+Test: [40/69]	Time  0.085 ( 0.108)	Loss 1.6730e+00 (2.3549e+00)	Acc@1  67.19 ( 48.67)
+Test: [50/69]	Time  0.081 ( 0.104)	Loss 1.3317e+00 (2.3718e+00)	Acc@1  71.88 ( 49.02)
+Test: [60/69]	Time  0.083 ( 0.101)	Loss 2.6943e+00 (2.3645e+00)	Acc@1  32.81 ( 49.10)
+ * Acc@1 48.774
+lr: 0.006817316198804997
+Traceback (most recent call last):
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 355, in <module>
+    main(args)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 127, in main
+    train_target(train_loader, classifier, optimizer, lr_scheduler, epoch, args)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 239, in train_target
+    pesudo_labels = collect_pseudo_labels(train_loader, model, args)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 156, in collect_pseudo_labels
+    y, f = model(x)
+ValueError: too many values to unpack (expected 2)

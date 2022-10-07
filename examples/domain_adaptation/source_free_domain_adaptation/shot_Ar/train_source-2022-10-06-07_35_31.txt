@@ -1,0 +1,206 @@
+Namespace(root='/data/office-home/', data='OfficeHome', domain=['Ar'], val_ratio=0.1, train_resizing='ran.crop', val_resizing='default', resize_size=224, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=(0.485, 0.456, 0.406), norm_std=(0.229, 0.224, 0.225), arch='resnet50', bottleneck_dim=256, no_pool=False, wn=False, scratch=False, load=None, batch_size=64, lr=0.01, lr_gamma=10, lr_decay=0.75, momentum=0.9, weight_decay=0.001, epsilon=1e-05, lb_smooth=0.1, trade_off=0.3, workers=8, epochs=50, print_freq=10, seed=None, per_class_eval=False, log='./shot_Ar/', phase='train_source')
+train_transform:  Compose(
+    Compose(
+    ResizeImage(size=(256, 256))
+    RandomCrop(size=(224, 224), padding=None)
+)
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+val_transform:  Compose(
+    Compose(
+    ResizeImage(size=(256, 256))
+    CenterCrop(size=(224, 224))
+)
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+=> using model 'resnet50'
+/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torchvision/models/_utils.py:252: UserWarning: Accessing the model URLs via the internal dictionary of the module is deprecated since 0.13 and will be removed in 0.15. Please access them via the appropriate Weights Enum instead.
+  warnings.warn(
+lr: 0.01
+Epoch: [0][ 0/35]	Time  4.93 ( 4.93)	Data  1.58 ( 1.58)	Loss   4.23 (  4.23)	Cls Acc 0.0 (0.0)
+Epoch: [0][10/35]	Time  0.24 ( 0.66)	Data  0.09 ( 0.22)	Loss   3.46 (  3.83)	Cls Acc 32.8 (19.2)
+Epoch: [0][20/35]	Time  0.25 ( 0.46)	Data  0.09 ( 0.16)	Loss   2.87 (  3.45)	Cls Acc 42.2 (28.7)
+Epoch: [0][30/35]	Time  0.24 ( 0.39)	Data  0.09 ( 0.14)	Loss   2.58 (  3.18)	Cls Acc 50.0 (36.0)
+Test: [0/4]	Time  1.365 ( 1.365)	Loss 1.7563e+00 (1.7563e+00)	Acc@1  59.38 ( 59.38)
+ * Acc@1 60.331
+lr: 0.008721959494934213
+Epoch: [1][ 0/35]	Time  1.58 ( 1.58)	Data  1.40 ( 1.40)	Loss   2.24 (  2.24)	Cls Acc 67.2 (67.2)
+Epoch: [1][10/35]	Time  0.25 ( 0.37)	Data  0.09 ( 0.21)	Loss   1.77 (  2.01)	Cls Acc 81.2 (73.2)
+Epoch: [1][20/35]	Time  0.24 ( 0.31)	Data  0.09 ( 0.15)	Loss   1.97 (  1.93)	Cls Acc 65.6 (74.5)
+Epoch: [1][30/35]	Time  0.25 ( 0.29)	Data  0.09 ( 0.13)	Loss   1.63 (  1.88)	Cls Acc 82.8 (74.5)
+Test: [0/4]	Time  1.394 ( 1.394)	Loss 1.3265e+00 (1.3265e+00)	Acc@1  75.00 ( 75.00)
+ * Acc@1 71.901
+lr: 0.007769695042409123
+Epoch: [2][ 0/35]	Time  1.64 ( 1.64)	Data  1.46 ( 1.46)	Loss   1.53 (  1.53)	Cls Acc 87.5 (87.5)
+Epoch: [2][10/35]	Time  0.25 ( 0.37)	Data  0.09 ( 0.22)	Loss   1.37 (  1.45)	Cls Acc 90.6 (85.9)
+Epoch: [2][20/35]	Time  0.25 ( 0.31)	Data  0.09 ( 0.16)	Loss   1.50 (  1.43)	Cls Acc 79.7 (86.9)
+Epoch: [2][30/35]	Time  0.25 ( 0.29)	Data  0.09 ( 0.14)	Loss   1.40 (  1.42)	Cls Acc 89.1 (87.7)
+Test: [0/4]	Time  1.442 ( 1.442)	Loss 1.1584e+00 (1.1584e+00)	Acc@1  79.69 ( 79.69)
+ * Acc@1 74.380
+lr: 0.007029266564879363
+Epoch: [3][ 0/35]	Time  1.52 ( 1.52)	Data  1.35 ( 1.35)	Loss   1.08 (  1.08)	Cls Acc 98.4 (98.4)
+Epoch: [3][10/35]	Time  0.25 ( 0.36)	Data  0.09 ( 0.21)	Loss   1.10 (  1.19)	Cls Acc 93.8 (94.2)
+Epoch: [3][20/35]	Time  0.25 ( 0.31)	Data  0.09 ( 0.15)	Loss   1.18 (  1.18)	Cls Acc 93.8 (94.5)
+Epoch: [3][30/35]	Time  0.25 ( 0.29)	Data  0.09 ( 0.13)	Loss   1.13 (  1.17)	Cls Acc 92.2 (94.0)
+Test: [0/4]	Time  1.607 ( 1.607)	Loss 1.0677e+00 (1.0677e+00)	Acc@1  82.81 ( 82.81)
+ * Acc@1 76.033
+lr: 0.006434956584934828
+Epoch: [4][ 0/35]	Time  1.67 ( 1.67)	Data  1.50 ( 1.50)	Loss   1.20 (  1.20)	Cls Acc 90.6 (90.6)
+Epoch: [4][10/35]	Time  0.25 ( 0.38)	Data  0.09 ( 0.22)	Loss   1.04 (  1.03)	Cls Acc 98.4 (97.2)
+Epoch: [4][20/35]	Time  0.25 ( 0.31)	Data  0.09 ( 0.16)	Loss   0.98 (  1.04)	Cls Acc 100.0 (97.5)
+Epoch: [4][30/35]	Time  0.25 ( 0.29)	Data  0.09 ( 0.14)	Loss   1.00 (  1.03)	Cls Acc 98.4 (97.5)
+Test: [0/4]	Time  1.484 ( 1.484)	Loss 1.0373e+00 (1.0373e+00)	Acc@1  81.25 ( 81.25)
+ * Acc@1 74.793
+lr: 0.005946035575013605
+Epoch: [5][ 0/35]	Time  1.66 ( 1.66)	Data  1.48 ( 1.48)	Loss   0.91 (  0.91)	Cls Acc 100.0 (100.0)
+Epoch: [5][10/35]	Time  0.25 ( 0.38)	Data  0.09 ( 0.22)	Loss   0.96 (  0.95)	Cls Acc 95.3 (99.0)
+Epoch: [5][20/35]	Time  0.25 ( 0.31)	Data  0.09 ( 0.16)	Loss   0.91 (  0.95)	Cls Acc 96.9 (98.9)
+Epoch: [5][30/35]	Time  0.25 ( 0.29)	Data  0.09 ( 0.14)	Loss   0.93 (  0.95)	Cls Acc 96.9 (98.4)
+Test: [0/4]	Time  1.441 ( 1.441)	Loss 1.0175e+00 (1.0175e+00)	Acc@1  82.81 ( 82.81)
+ * Acc@1 76.860
+lr: 0.005535833116504121
+Epoch: [6][ 0/35]	Time  1.65 ( 1.65)	Data  1.48 ( 1.48)	Loss   0.95 (  0.95)	Cls Acc 96.9 (96.9)
+Epoch: [6][10/35]	Time  0.25 ( 0.38)	Data  0.09 ( 0.22)	Loss   0.92 (  0.91)	Cls Acc 100.0 (98.9)
+Epoch: [6][20/35]	Time  0.25 ( 0.31)	Data  0.09 ( 0.16)	Loss   0.88 (  0.90)	Cls Acc 100.0 (99.0)
+Epoch: [6][30/35]	Time  0.25 ( 0.29)	Data  0.09 ( 0.14)	Loss   0.92 (  0.90)	Cls Acc 100.0 (98.9)
+Test: [0/4]	Time  1.401 ( 1.401)	Loss 9.8209e-01 (9.8209e-01)	Acc@1  84.38 ( 84.38)
+ * Acc@1 76.860
+lr: 0.005186108144070652
+Epoch: [7][ 0/35]	Time  1.63 ( 1.63)	Data  1.45 ( 1.45)	Loss   0.85 (  0.85)	Cls Acc 100.0 (100.0)
+Epoch: [7][10/35]	Time  0.25 ( 0.37)	Data  0.09 ( 0.22)	Loss   0.89 (  0.87)	Cls Acc 98.4 (99.3)
+Epoch: [7][20/35]	Time  0.25 ( 0.31)	Data  0.09 ( 0.16)	Loss   0.88 (  0.87)	Cls Acc 100.0 (99.3)
+Epoch: [7][30/35]	Time  0.25 ( 0.29)	Data  0.09 ( 0.14)	Loss   0.88 (  0.87)	Cls Acc 98.4 (99.2)
+Test: [0/4]	Time  1.424 ( 1.424)	Loss 9.6662e-01 (9.6662e-01)	Acc@1  81.25 ( 81.25)
+ * Acc@1 76.446
+lr: 0.004883936278745637
+Epoch: [8][ 0/35]	Time  1.53 ( 1.53)	Data  1.35 ( 1.35)	Loss   0.83 (  0.83)	Cls Acc 100.0 (100.0)
+Epoch: [8][10/35]	Time  0.25 ( 0.36)	Data  0.09 ( 0.21)	Loss   0.85 (  0.84)	Cls Acc 100.0 (99.7)
+Epoch: [8][20/35]	Time  0.25 ( 0.31)	Data  0.09 ( 0.15)	Loss   0.82 (  0.85)	Cls Acc 100.0 (99.6)
+Epoch: [8][30/35]	Time  0.25 ( 0.29)	Data  0.09 ( 0.13)	Loss   0.86 (  0.85)	Cls Acc 100.0 (99.4)
+Test: [0/4]	Time  1.402 ( 1.402)	Loss 9.9324e-01 (9.9324e-01)	Acc@1  82.81 ( 82.81)
+ * Acc@1 76.446
+lr: 0.004619888312917149
+Epoch: [9][ 0/35]	Time  1.87 ( 1.87)	Data  1.70 ( 1.70)	Loss   0.85 (  0.85)	Cls Acc 100.0 (100.0)
+Epoch: [9][10/35]	Time  0.25 ( 0.40)	Data  0.09 ( 0.24)	Loss   0.86 (  0.83)	Cls Acc 96.9 (99.4)
+Epoch: [9][20/35]	Time  0.25 ( 0.32)	Data  0.09 ( 0.17)	Loss   0.86 (  0.84)	Cls Acc 96.9 (99.3)
+Epoch: [9][30/35]	Time  0.25 ( 0.30)	Data  0.09 ( 0.14)	Loss   0.80 (  0.83)	Cls Acc 100.0 (99.5)
+Test: [0/4]	Time  1.501 ( 1.501)	Loss 9.8714e-01 (9.8714e-01)	Acc@1  79.69 ( 79.69)
+ * Acc@1 76.033
+lr: 0.004386913376508308
+Epoch: [10][ 0/35]	Time  1.64 ( 1.64)	Data  1.47 ( 1.47)	Loss   0.82 (  0.82)	Cls Acc 100.0 (100.0)
+Epoch: [10][10/35]	Time  0.25 ( 0.37)	Data  0.09 ( 0.22)	Loss   0.85 (  0.83)	Cls Acc 98.4 (99.4)
+Epoch: [10][20/35]	Time  0.25 ( 0.31)	Data  0.09 ( 0.16)	Loss   0.82 (  0.83)	Cls Acc 100.0 (99.6)
+Epoch: [10][30/35]	Time  0.25 ( 0.29)	Data  0.09 ( 0.14)	Loss   0.85 (  0.83)	Cls Acc 98.4 (99.5)
+Test: [0/4]	Time  1.392 ( 1.392)	Loss 1.0099e+00 (1.0099e+00)	Acc@1  81.25 ( 81.25)
+ * Acc@1 76.860
+lr: 0.004179626906102638
+Epoch: [11][ 0/35]	Time  1.69 ( 1.69)	Data  1.51 ( 1.51)	Loss   0.80 (  0.80)	Cls Acc 100.0 (100.0)
+Epoch: [11][10/35]	Time  0.25 ( 0.38)	Data  0.09 ( 0.22)	Loss   0.81 (  0.81)	Cls Acc 100.0 (100.0)
+Epoch: [11][20/35]	Time  0.25 ( 0.32)	Data  0.09 ( 0.16)	Loss   0.83 (  0.82)	Cls Acc 100.0 (99.6)
+Epoch: [11][30/35]	Time  0.25 ( 0.29)	Data  0.09 ( 0.14)	Loss   0.85 (  0.82)	Cls Acc 98.4 (99.5)
+Test: [0/4]	Time  1.466 ( 1.466)	Loss 9.9887e-01 (9.9887e-01)	Acc@1  85.94 ( 85.94)
+ * Acc@1 77.686
+lr: 0.0039938413785795416
+Epoch: [12][ 0/35]	Time  1.62 ( 1.62)	Data  1.45 ( 1.45)	Loss   0.81 (  0.81)	Cls Acc 100.0 (100.0)
+Epoch: [12][10/35]	Time  0.25 ( 0.37)	Data  0.09 ( 0.22)	Loss   0.81 (  0.81)	Cls Acc 100.0 (99.7)
+Epoch: [12][20/35]	Time  0.25 ( 0.31)	Data  0.09 ( 0.16)	Loss   0.83 (  0.82)	Cls Acc 98.4 (99.4)
+Epoch: [12][30/35]	Time  0.25 ( 0.29)	Data  0.09 ( 0.14)	Loss   0.80 (  0.82)	Cls Acc 100.0 (99.5)
+Test: [0/4]	Time  1.472 ( 1.472)	Loss 9.8640e-01 (9.8640e-01)	Acc@1  82.81 ( 82.81)
+ * Acc@1 76.446
+lr: 0.0038262480777690546
+Epoch: [13][ 0/35]	Time  1.74 ( 1.74)	Data  1.56 ( 1.56)	Loss   0.80 (  0.80)	Cls Acc 100.0 (100.0)
+Epoch: [13][10/35]	Time  0.25 ( 0.39)	Data  0.09 ( 0.23)	Loss   0.81 (  0.81)	Cls Acc 100.0 (99.3)
+Epoch: [13][20/35]	Time  0.25 ( 0.32)	Data  0.09 ( 0.16)	Loss   0.79 (  0.81)	Cls Acc 100.0 (99.4)
+Epoch: [13][30/35]	Time  0.25 ( 0.30)	Data  0.09 ( 0.14)	Loss   0.79 (  0.81)	Cls Acc 100.0 (99.5)
+Test: [0/4]	Time  1.396 ( 1.396)	Loss 9.8003e-01 (9.8003e-01)	Acc@1  84.38 ( 84.38)
+ * Acc@1 77.273
+lr: 0.0036741958520219342
+Epoch: [14][ 0/35]	Time  1.79 ( 1.79)	Data  1.61 ( 1.61)	Loss   0.79 (  0.79)	Cls Acc 100.0 (100.0)
+Epoch: [14][10/35]	Time  0.25 ( 0.39)	Data  0.09 ( 0.23)	Loss   0.83 (  0.81)	Cls Acc 98.4 (99.9)
+Epoch: [14][20/35]	Time  0.25 ( 0.32)	Data  0.09 ( 0.16)	Loss   0.80 (  0.81)	Cls Acc 100.0 (99.5)
+Epoch: [14][30/35]	Time  0.25 ( 0.30)	Data  0.09 ( 0.14)	Loss   0.80 (  0.81)	Cls Acc 100.0 (99.5)
+Test: [0/4]	Time  1.417 ( 1.417)	Loss 9.9420e-01 (9.9420e-01)	Acc@1  81.25 ( 81.25)
+ * Acc@1 77.273
+lr: 0.003535533905932738
+Epoch: [15][ 0/35]	Time  1.72 ( 1.72)	Data  1.55 ( 1.55)	Loss   0.80 (  0.80)	Cls Acc 100.0 (100.0)
+Epoch: [15][10/35]	Time  0.25 ( 0.38)	Data  0.09 ( 0.23)	Loss   0.80 (  0.80)	Cls Acc 100.0 (100.0)
+Epoch: [15][20/35]	Time  0.25 ( 0.32)	Data  0.09 ( 0.16)	Loss   0.79 (  0.80)	Cls Acc 100.0 (99.9)
+Epoch: [15][30/35]	Time  0.25 ( 0.30)	Data  0.09 ( 0.14)	Loss   0.83 (  0.81)	Cls Acc 96.9 (99.7)
+Test: [0/4]	Time  1.375 ( 1.375)	Loss 9.9063e-01 (9.9063e-01)	Acc@1  82.81 ( 82.81)
+ * Acc@1 74.793
+lr: 0.0034084979112934868
+Epoch: [16][ 0/35]	Time  1.59 ( 1.59)	Data  1.41 ( 1.41)	Loss   0.79 (  0.79)	Cls Acc 100.0 (100.0)
+Epoch: [16][10/35]	Time  0.25 ( 0.37)	Data  0.09 ( 0.21)	Loss   0.81 (  0.80)	Cls Acc 98.4 (99.6)
+Epoch: [16][20/35]	Time  0.25 ( 0.31)	Data  0.09 ( 0.16)	Loss   0.81 (  0.80)	Cls Acc 98.4 (99.6)
+Epoch: [16][30/35]	Time  0.25 ( 0.29)	Data  0.09 ( 0.14)	Loss   0.82 (  0.80)	Cls Acc 98.4 (99.6)
+Test: [0/4]	Time  1.384 ( 1.384)	Loss 1.0009e+00 (1.0009e+00)	Acc@1  81.25 ( 81.25)
+ * Acc@1 76.446
+lr: 0.0032916260648071937
+Epoch: [17][ 0/35]	Time  1.86 ( 1.86)	Data  1.69 ( 1.69)	Loss   0.79 (  0.79)	Cls Acc 100.0 (100.0)
+Epoch: [17][10/35]	Time  0.25 ( 0.39)	Data  0.09 ( 0.24)	Loss   0.80 (  0.80)	Cls Acc 98.4 (99.4)
+Epoch: [17][20/35]	Time  0.25 ( 0.32)	Data  0.09 ( 0.17)	Loss   0.79 (  0.80)	Cls Acc 100.0 (99.6)
+Epoch: [17][30/35]	Time  0.25 ( 0.30)	Data  0.09 ( 0.14)	Loss   0.80 (  0.80)	Cls Acc 100.0 (99.5)
+Test: [0/4]	Time  1.398 ( 1.398)	Loss 9.6303e-01 (9.6303e-01)	Acc@1  82.81 ( 82.81)
+ * Acc@1 76.033
+lr: 0.00318369625258112
+Epoch: [18][ 0/35]	Time  1.65 ( 1.65)	Data  1.47 ( 1.47)	Loss   0.80 (  0.80)	Cls Acc 100.0 (100.0)
+Epoch: [18][10/35]	Time  0.25 ( 0.38)	Data  0.09 ( 0.22)	Loss   0.79 (  0.80)	Cls Acc 100.0 (99.9)
+Epoch: [18][20/35]	Time  0.25 ( 0.32)	Data  0.09 ( 0.16)	Loss   0.80 (  0.79)	Cls Acc 100.0 (99.7)
+Epoch: [18][30/35]	Time  0.25 ( 0.29)	Data  0.09 ( 0.14)	Loss   0.79 (  0.79)	Cls Acc 100.0 (99.7)
+Test: [0/4]	Time  1.377 ( 1.377)	Loss 1.0015e+00 (1.0015e+00)	Acc@1  81.25 ( 81.25)
+ * Acc@1 75.620
+lr: 0.0030836783520511884
+Epoch: [19][ 0/35]	Time  1.80 ( 1.80)	Data  1.63 ( 1.63)	Loss   0.79 (  0.79)	Cls Acc 100.0 (100.0)
+Epoch: [19][10/35]	Time  0.24 ( 0.39)	Data  0.09 ( 0.23)	Loss   0.80 (  0.80)	Cls Acc 100.0 (99.6)
+Epoch: [19][20/35]	Time  0.25 ( 0.32)	Data  0.09 ( 0.17)	Loss   0.79 (  0.79)	Cls Acc 100.0 (99.7)
+Epoch: [19][30/35]	Time  0.25 ( 0.30)	Data  0.09 ( 0.14)	Loss   0.80 (  0.79)	Cls Acc 100.0 (99.5)
+Test: [0/4]	Time  1.521 ( 1.521)	Loss 9.9380e-01 (9.9380e-01)	Acc@1  81.25 ( 81.25)
+ * Acc@1 75.620
+lr: 0.0029906975624424408
+Epoch: [20][ 0/35]	Time  1.72 ( 1.72)	Data  1.54 ( 1.54)	Loss   0.81 (  0.81)	Cls Acc 96.9 (96.9)
+Epoch: [20][10/35]	Time  0.25 ( 0.38)	Data  0.09 ( 0.23)	Loss   0.79 (  0.79)	Cls Acc 100.0 (99.3)
+Epoch: [20][20/35]	Time  0.25 ( 0.32)	Data  0.09 ( 0.16)	Loss   0.79 (  0.79)	Cls Acc 100.0 (99.3)
+Epoch: [20][30/35]	Time  0.25 ( 0.30)	Data  0.09 ( 0.14)	Loss   0.78 (  0.79)	Cls Acc 100.0 (99.4)
+Test: [0/4]	Time  1.463 ( 1.463)	Loss 1.0066e+00 (1.0066e+00)	Acc@1  81.25 ( 81.25)
+ * Acc@1 75.207
+lr: 0.0029040058859521123
+Epoch: [21][ 0/35]	Time  1.76 ( 1.76)	Data  1.58 ( 1.58)	Loss   0.79 (  0.79)	Cls Acc 100.0 (100.0)
+Epoch: [21][10/35]	Time  0.25 ( 0.39)	Data  0.09 ( 0.23)	Loss   0.78 (  0.79)	Cls Acc 100.0 (99.4)
+Epoch: [21][20/35]	Time  0.25 ( 0.32)	Data  0.09 ( 0.16)	Loss   0.82 (  0.79)	Cls Acc 96.9 (99.3)
+Epoch: [21][30/35]	Time  0.25 ( 0.30)	Data  0.09 ( 0.14)	Loss   0.78 (  0.80)	Cls Acc 100.0 (99.3)
+Test: [0/4]	Time  1.427 ( 1.427)	Loss 9.8789e-01 (9.8789e-01)	Acc@1  82.81 ( 82.81)
+ * Acc@1 76.033
+lr: 0.0028229597119700817
+Epoch: [22][ 0/35]	Time  2.29 ( 2.29)	Data  2.12 ( 2.12)	Loss   0.80 (  0.80)	Cls Acc 98.4 (98.4)
+Epoch: [22][10/35]	Time  0.25 ( 0.43)	Data  0.09 ( 0.28)	Loss   0.81 (  0.79)	Cls Acc 98.4 (99.6)
+Epoch: [22][20/35]	Time  0.25 ( 0.35)	Data  0.09 ( 0.19)	Loss   0.79 (  0.79)	Cls Acc 100.0 (99.6)
+Epoch: [22][30/35]	Time  0.25 ( 0.31)	Data  0.09 ( 0.16)	Loss   0.79 (  0.79)	Cls Acc 100.0 (99.6)
+Test: [0/4]	Time  1.545 ( 1.545)	Loss 1.0211e+00 (1.0211e+00)	Acc@1  82.81 ( 82.81)
+ * Acc@1 76.446
+lr: 0.0027470020261194956
+Epoch: [23][ 0/35]	Time  1.58 ( 1.58)	Data  1.41 ( 1.41)	Loss   0.78 (  0.78)	Cls Acc 100.0 (100.0)
+Epoch: [23][10/35]	Time  0.25 ( 0.37)	Data  0.09 ( 0.21)	Loss   0.78 (  0.79)	Cls Acc 100.0 (99.9)
+Epoch: [23][20/35]	Time  0.25 ( 0.31)	Data  0.09 ( 0.16)	Loss   0.79 (  0.79)	Cls Acc 100.0 (99.9)
+Epoch: [23][30/35]	Time  0.25 ( 0.29)	Data  0.09 ( 0.13)	Loss   0.78 (  0.79)	Cls Acc 100.0 (99.7)
+Test: [0/4]	Time  1.567 ( 1.567)	Loss 9.9743e-01 (9.9743e-01)	Acc@1  82.81 ( 82.81)
+ * Acc@1 76.033
+lr: 0.0026756481627522805
+Epoch: [24][ 0/35]	Time  1.91 ( 1.91)	Data  1.74 ( 1.74)	Loss   0.79 (  0.79)	Cls Acc 100.0 (100.0)
+Epoch: [24][10/35]	Time  0.25 ( 0.40)	Data  0.09 ( 0.24)	Loss   0.78 (  0.79)	Cls Acc 100.0 (99.9)
+Epoch: [24][20/35]	Time  0.25 ( 0.33)	Data  0.09 ( 0.17)	Loss   0.79 (  0.79)	Cls Acc 100.0 (99.6)
+Epoch: [24][30/35]	Time  0.25 ( 0.30)	Data  0.09 ( 0.15)	Loss   0.78 (  0.79)	Cls Acc 100.0 (99.6)
+Test: [0/4]	Time  1.426 ( 1.426)	Loss 9.9222e-01 (9.9222e-01)	Acc@1  82.81 ( 82.81)
+ * Acc@1 76.033
+lr: 0.0026084743001221454
+Epoch: [25][ 0/35]	Time  1.58 ( 1.58)	Data  1.41 ( 1.41)	Loss   0.80 (  0.80)	Cls Acc 100.0 (100.0)
+Traceback (most recent call last):
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 354, in <module>
+    main(args)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 125, in main
+    train_source(train_loader, classifier, optimizer, lr_scheduler, epoch, args)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 200, in train_source
+    x, labels = x.to(device), labels.to(device)
+KeyboardInterrupt

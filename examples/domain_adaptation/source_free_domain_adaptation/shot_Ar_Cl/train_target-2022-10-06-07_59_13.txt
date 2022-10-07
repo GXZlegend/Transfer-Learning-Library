@@ -1,0 +1,50 @@
+Namespace(root='/data/office-home/', data='OfficeHome', domain=['Cl'], val_ratio=0.0, train_resizing='ran.crop', val_resizing='default', resize_size=224, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=(0.485, 0.456, 0.406), norm_std=(0.229, 0.224, 0.225), arch='resnet50', bottleneck_dim=256, no_pool=False, wn=False, scratch=False, load='./shot_Ar/checkpoints/best.pth', batch_size=64, lr=0.01, lr_gamma=10, lr_decay=0.75, momentum=0.9, weight_decay=0.001, epsilon=1e-05, lb_smooth=0.1, trade_off=0.0, workers=8, epochs=15, print_freq=10, seed=None, per_class_eval=False, log='./shot_Ar_Cl/', phase='train_target')
+train_transform:  Compose(
+    Compose(
+    ResizeImage(size=(256, 256))
+    RandomCrop(size=(224, 224), padding=None)
+)
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+val_transform:  Compose(
+    Compose(
+    ResizeImage(size=(256, 256))
+    CenterCrop(size=(224, 224))
+)
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+=> using model 'resnet50'
+/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torchvision/models/_utils.py:252: UserWarning: Accessing the model URLs via the internal dictionary of the module is deprecated since 0.13 and will be removed in 0.15. Please access them via the appropriate Weights Enum instead.
+  warnings.warn(
+lr: 0.01
+False False False
+Epoch: [0][ 0/69]	Time  2.21 ( 2.21)	Data  0.99 ( 0.99)	Loss   3.05 (  3.05)
+Epoch: [0][10/69]	Time  0.24 ( 0.42)	Data  0.09 ( 0.17)	Loss   2.61 (  2.84)
+Epoch: [0][20/69]	Time  0.24 ( 0.34)	Data  0.09 ( 0.13)	Loss   2.16 (  2.65)
+Epoch: [0][30/69]	Time  0.25 ( 0.31)	Data  0.09 ( 0.12)	Loss   2.15 (  2.55)
+Epoch: [0][40/69]	Time  0.25 ( 0.29)	Data  0.09 ( 0.11)	Loss   2.02 (  2.45)
+Epoch: [0][50/69]	Time  0.25 ( 0.28)	Data  0.09 ( 0.11)	Loss   1.80 (  2.37)
+Epoch: [0][60/69]	Time  0.25 ( 0.28)	Data  0.09 ( 0.11)	Loss   1.98 (  2.29)
+Test: [ 0/69]	Time  1.035 ( 1.035)	Loss 2.9232e+00 (2.9232e+00)	Acc@1  26.56 ( 26.56)
+Test: [10/69]	Time  0.087 ( 0.177)	Loss 1.1287e+00 (2.2628e+00)	Acc@1  75.00 ( 48.86)
+Test: [20/69]	Time  0.083 ( 0.133)	Loss 4.8711e-01 (2.3448e+00)	Acc@1  87.50 ( 47.69)
+Test: [30/69]	Time  0.083 ( 0.117)	Loss 1.8498e+00 (2.4946e+00)	Acc@1  50.00 ( 45.92)
+Test: [40/69]	Time  0.084 ( 0.109)	Loss 2.6327e+00 (2.4610e+00)	Acc@1  40.62 ( 46.88)
+Test: [50/69]	Time  0.083 ( 0.104)	Loss 1.4612e+00 (2.4585e+00)	Acc@1  70.31 ( 47.82)
+Test: [60/69]	Time  0.083 ( 0.100)	Loss 2.4307e+00 (2.3975e+00)	Acc@1  40.62 ( 48.87)
+ * Acc@1 47.881
+lr: 0.006817316198804997
+False False False
+Traceback (most recent call last):
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 358, in <module>
+    main(args)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 127, in main
+    train_target(train_loader, classifier, optimizer, lr_scheduler, epoch, args)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 243, in train_target
+    pesudo_labels = collect_pseudo_labels(train_loader, model, args)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 160, in collect_pseudo_labels
+    feature_list.append(f.detach().cpu())
+KeyboardInterrupt

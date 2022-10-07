@@ -1,0 +1,67 @@
+Namespace(root='/data/office-home/', data='OfficeHome', domain=['Cl'], val_ratio=0.0, train_resizing='ran.crop', val_resizing='default', resize_size=224, scale=[0.08, 1.0], ratio=[0.75, 1.3333333333333333], no_hflip=False, norm_mean=(0.485, 0.456, 0.406), norm_std=(0.229, 0.224, 0.225), arch='resnet50', bottleneck_dim=256, no_pool=False, wn=False, scratch=False, load='./shot_Ar/checkpoints/best.pth', batch_size=64, lr=0.01, lr_gamma=10, lr_decay=0.75, momentum=0.9, weight_decay=0.001, epsilon=1e-05, lb_smooth=0.1, trade_off=0.0, workers=8, epochs=15, print_freq=10, seed=None, per_class_eval=False, log='./shot_Ar_Cl/', phase='train_target')
+train_transform:  Compose(
+    Compose(
+    ResizeImage(size=(256, 256))
+    RandomCrop(size=(224, 224), padding=None)
+)
+    RandomHorizontalFlip(p=0.5)
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+val_transform:  Compose(
+    Compose(
+    ResizeImage(size=(256, 256))
+    CenterCrop(size=(224, 224))
+)
+    ToTensor()
+    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+)
+=> using model 'resnet50'
+/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torchvision/models/_utils.py:252: UserWarning: Accessing the model URLs via the internal dictionary of the module is deprecated since 0.13 and will be removed in 0.15. Please access them via the appropriate Weights Enum instead.
+  warnings.warn(
+Epoch: [0][ 0/69]	Time  2.14 ( 2.14)	Data  0.97 ( 0.97)	Loss   2.88 (  2.88)
+Epoch: [0][10/69]	Time  0.24 ( 0.41)	Data  0.09 ( 0.16)	Loss   2.61 (  2.76)
+Epoch: [0][20/69]	Time  0.24 ( 0.33)	Data  0.09 ( 0.13)	Loss   2.14 (  2.57)
+Epoch: [0][30/69]	Time  0.24 ( 0.30)	Data  0.09 ( 0.12)	Loss   2.05 (  2.39)
+Epoch: [0][40/69]	Time  0.24 ( 0.29)	Data  0.09 ( 0.11)	Loss   1.65 (  2.25)
+Epoch: [0][50/69]	Time  0.25 ( 0.28)	Data  0.09 ( 0.11)	Loss   1.70 (  2.15)
+Epoch: [0][60/69]	Time  0.24 ( 0.27)	Data  0.09 ( 0.10)	Loss   1.63 (  2.05)
+Test: [ 0/69]	Time  0.902 ( 0.902)	Loss 4.7504e+00 (4.7504e+00)	Acc@1  25.00 ( 25.00)
+Test: [10/69]	Time  0.085 ( 0.159)	Loss 1.7715e+00 (3.0124e+00)	Acc@1  70.31 ( 48.44)
+Test: [20/69]	Time  0.082 ( 0.124)	Loss 6.0830e-01 (3.2083e+00)	Acc@1  89.06 ( 41.82)
+Test: [30/69]	Time  0.081 ( 0.111)	Loss 2.1801e+00 (3.2612e+00)	Acc@1  62.50 ( 42.74)
+Test: [40/69]	Time  0.086 ( 0.104)	Loss 2.9317e+00 (3.1841e+00)	Acc@1  45.31 ( 43.71)
+Test: [50/69]	Time  0.085 ( 0.101)	Loss 1.6433e+00 (3.1527e+00)	Acc@1  73.44 ( 45.47)
+Test: [60/69]	Time  0.081 ( 0.098)	Loss 4.2051e+00 (3.0595e+00)	Acc@1  18.75 ( 46.34)
+ * Acc@1 45.475
+Traceback (most recent call last):
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 355, in <module>
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 127, in main
+    
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 244, in train_target
+    
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/examples/domain_adaptation/source_free_domain_adaptation/shot.py", line 156, in collect_pseudo_labels
+    feature_list.append(f.detach().cpu())
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/tllib/modules/classifier.py", line 80, in forward
+    f = self.pool_layer(self.backbone(x))
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/workspace/guoxingzhuo/Transfer-Learning-Library/tllib/vision/models/resnet.py", line 32, in forward
+    x = self.layer1(x)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/nn/modules/container.py", line 139, in forward
+    input = module(input)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torchvision/models/resnet.py", line 155, in forward
+    out = self.bn3(out)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/nn/modules/batchnorm.py", line 168, in forward
+    return F.batch_norm(
+  File "/home/guoxingzhuo/anaconda3/lib/python3.9/site-packages/torch/nn/functional.py", line 2438, in batch_norm
+    return torch.batch_norm(
+KeyboardInterrupt
