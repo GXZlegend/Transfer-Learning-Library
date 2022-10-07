@@ -178,6 +178,8 @@ def validate(val_loader, model, args, device) -> float:
     with torch.no_grad():
         end = time.time()
         for i, data in enumerate(val_loader):
+            if isinstance(val_loader.dataset, IndexedDataset):
+                data = data[0]
             images, target = data[:2]
             images = images.to(device)
             target = target.to(device)

@@ -58,6 +58,7 @@ def main(args: argparse.Namespace):
     # create indexed dataset in train_target phase
     if args.phase == 'train_target':
         train_dataset = utils.IndexedDataset(train_dataset)
+        val_dataset = utils.IndexedDataset(val_dataset)
     # should not drop last in train_target phase
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size,
                               shuffle=True, num_workers=args.workers, drop_last=False)
@@ -123,7 +124,8 @@ def main(args: argparse.Namespace):
         if args.phase == "train_source":
             train_source(train_loader, classifier, optimizer, lr_scheduler, epoch, args)
         else:
-            train_target(train_loader, classifier, optimizer, lr_scheduler, epoch, args)
+            pseudo_labels = collect_pseudo_labels(val_loader, classifier, args)
+            train_target(train_loader, pseudo_labels, classifier, optimizer, lr_scheduler, epoch, args)
 
         # evaluate on validation set
         acc1 = utils.validate(val_loader, classifier, args, device)
@@ -144,18 +146,21 @@ def main(args: argparse.Namespace):
     logger.close()
 
 
-def collect_pseudo_labels(train_loader: DataLoader, model: ImageClassifier, args: argparse.Namespace):
+def collect_pseudo_labels(val_loader: DataLoader, model: ImageClassifier, args: argparse.Namespace):
+    model.eval()
+    model.training = True # For feature returning
     feature_list = []
     output_list = []
     index_list = []
     with torch.no_grad():
-        for data, index in train_loader:
+        for data, index in val_loader:
             x, _ = data[:2]
             x = x.to(device)
             y, f = model(x)
             feature_list.append(f.detach().cpu())
             output_list.append(y.detach().cpu())
             index_list.append(index)
+    model.training = False
     all_feature = torch.cat(feature_list)
     all_output = torch.cat(output_list)
     all_output = all_output.softmax(dim=1)
@@ -224,7 +229,7 @@ def train_source(train_loader: DataLoader, model: ImageClassifier, optimizer: SG
             progress.display(i)
 
 
-def train_target(train_loader: DataLoader, model: ImageClassifier,
+def train_target(train_loader: DataLoader, pesudo_labels: torch.LongTensor, model: ImageClassifier,
                  optimizer: SGD, lr_scheduler: LambdaLR, epoch: int, args: argparse.Namespace):
     batch_time = AverageMeter('Time', ':5.2f')
     data_time = AverageMeter('Data', ':5.2f')
@@ -239,8 +244,6 @@ def train_target(train_loader: DataLoader, model: ImageClassifier,
     model.train()
     #######################
     model.head.eval()
-    
-    pesudo_labels = collect_pseudo_labels(train_loader, model, args)
 
     end = time.time()
     for i, (data, index) in enumerate(train_loader):
