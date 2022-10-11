@@ -75,7 +75,7 @@ def main(args: argparse.Namespace):
     # should not drop last in train_target phase
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size,
                               shuffle=True, num_workers=args.workers, drop_last=False)
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
+    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
 
     args.iters_per_epoch = len(train_loader)
