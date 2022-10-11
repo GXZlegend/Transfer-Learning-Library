@@ -27,6 +27,19 @@ from tllib.modules.entropy import entropy
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
+def init_weights(m):
+    classname = m.__class__.__name__
+    if classname.find('Conv2d') != -1 or classname.find('ConvTranspose2d') != -1:
+        nn.init.kaiming_uniform_(m.weight)
+        nn.init.zeros_(m.bias)
+    elif classname.find('BatchNorm') != -1:
+        nn.init.normal_(m.weight, 1.0, 0.02)
+        nn.init.zeros_(m.bias)
+    elif classname.find('Linear') != -1:
+        nn.init.xavier_normal_(m.weight)
+        nn.init.zeros_(m.bias)
+
+
 def main(args: argparse.Namespace):
     logger = CompleteLogger(args.log, args.phase)
     print(args)
@@ -62,7 +75,7 @@ def main(args: argparse.Namespace):
     # should not drop last in train_target phase
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size,
                               shuffle=True, num_workers=args.workers, drop_last=False)
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
+    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
 
     args.iters_per_epoch = len(train_loader)
@@ -73,6 +86,9 @@ def main(args: argparse.Namespace):
     pool_layer = nn.Identity() if args.no_pool else None
     classifier = ImageClassifier(backbone, num_classes, bottleneck_dim=args.bottleneck_dim,
                                  pool_layer=pool_layer, finetune=not args.scratch).to(device)
+    classifier.bottleneck.apply(init_weights)
+    classifier.head.apply(init_weights)
+
     if args.wn:
         classifier.head = weight_norm(classifier.head)
 
@@ -90,8 +106,6 @@ def main(args: argparse.Namespace):
     if args.phase == 'train_target':
         # fix the classifier head
         #######################
-        classifier.head.eval()
-        classifier.head.requires_grad_(False)
         parameters.pop(-1)
     
     optimizer = SGD(parameters, args.lr, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=True)
@@ -343,7 +357,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', default=50, type=int, metavar='N',
                         help='number of total epochs to run')
     parser.add_argument('-p', '--print-freq', default=10, type=int,
-                        metavar='N', help='print frequency (default: 100)')
+                        metavar='N', help='print frequency (default: 10)')
     parser.add_argument('--seed', default=None, type=int,
                         help='seed for initializing training. ')
     parser.add_argument('--per-class-eval', action='store_true',

@@ -1,2 +1,3 @@
-# python shot.py /data/office-home/ --domain Ar --val-ratio 0.1 --train-resizing ran.crop --epochs 50 --log ./shot_Ar/ --phase train_source --lb-smooth 0.1
-python shot.py /data/office-home/ --domain Cl --val-ratio 0   --train-resizing ran.crop --epochs 15 --log ./shot_Ar_Cl/ --phase train_target --load ./shot_Ar/checkpoints/best.pth --trade-off 0
+CUDA_VISIBLE_DEVICES=1 python shot.py /data/office-home/ --domain Ar --val-ratio 0.1 --train-resizing ran.crop --epochs 50 --log ./shot_Ar_0/ --phase train_source --lb-smooth 0.1
+CUDA_VISIBLE_DEVICES=1 python shot.py /data/office-home/ --domain Cl --val-ratio 0   --train-resizing ran.crop --epochs 15 --log ./shot_Ar_Cl_0/ --phase train_target --load ./shot_Ar_0/checkpoints/best.pth --trade-off 0.3
+CUDA_VISIBLE_DEVICES=1 python shot.py /data/office-home/ --domain Cl --val-ratio 0   --train-resizing ran.crop --epochs 15 --log ./shotim_Ar_Cl_0/ --phase train_target --load ./shot_Ar_0/checkpoints/best.pth --trade-off 0
