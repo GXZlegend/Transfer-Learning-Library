@@ -28,13 +28,14 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def init_weights(m):
+    pass
     classname = m.__class__.__name__
     if classname.find('Conv2d') != -1 or classname.find('ConvTranspose2d') != -1:
         nn.init.kaiming_uniform_(m.weight)
         nn.init.zeros_(m.bias)
-    elif classname.find('BatchNorm') != -1:
-        nn.init.normal_(m.weight, 1.0, 0.02)
-        nn.init.zeros_(m.bias)
+    # elif classname.find('BatchNorm') != -1:
+    #     nn.init.normal_(m.weight, 1.0, 0.02)
+    #     nn.init.zeros_(m.bias)
     elif classname.find('Linear') != -1:
         nn.init.xavier_normal_(m.weight)
         nn.init.zeros_(m.bias)
@@ -86,11 +87,12 @@ def main(args: argparse.Namespace):
     pool_layer = nn.Identity() if args.no_pool else None
     classifier = ImageClassifier(backbone, num_classes, bottleneck_dim=args.bottleneck_dim,
                                  pool_layer=pool_layer, finetune=not args.scratch).to(device)
-    classifier.bottleneck.apply(init_weights)
-    classifier.head.apply(init_weights)
 
     if args.wn:
         classifier.head = weight_norm(classifier.head)
+
+    classifier.bottleneck.apply(init_weights)
+    classifier.head.apply(init_weights)
 
     if args.load:
         checkpoint = torch.load(args.load, map_location='cpu')
@@ -165,35 +167,44 @@ def collect_pseudo_labels(val_loader: DataLoader, model: ImageClassifier, args: 
     model.training = True # For feature returning
     feature_list = []
     output_list = []
+    label_list = []
     index_list = []
     with torch.no_grad():
         for data, index in val_loader:
-            x, _ = data[:2]
+            x, label = data[:2]
             x = x.to(device)
             y, f = model(x)
             feature_list.append(f.detach().cpu())
             output_list.append(y.detach().cpu())
+            label_list.append(label)
             index_list.append(index)
     model.training = False
     all_feature = torch.cat(feature_list)
     all_output = torch.cat(output_list)
     all_output = all_output.softmax(dim=1)
+    all_label = torch.cat(label_list)
     all_index = torch.cat(index_list)
     num_classes = all_output.size(1)
 
     # Why?
     all_feature = torch.cat((all_feature, torch.ones(all_feature.size(0), 1)), 1)
-    all_feature = (all_feature.t() / torch.norm(all_feature, p=2, dim=1)).t()
+    all_feature = (all_feature.t() / torch.norm(all_feature, dim=1)).t()
     
     for _ in range(2):
+        # print(all_output.sum(dim=0))
         centroids = torch.mm(all_output.T, all_feature) / (all_output.sum(dim=0).unsqueeze(1) + args.epsilon) # (num_classes, feature_dim)
         # cosine similarity
+        from scipy.spatial.distance import cdist
+        # dists_gt = torch.from_numpy(cdist(all_feature.numpy(), centroids.numpy(), "cosine"))
         dists = torch.mm(F.normalize(all_feature, dim=1), F.normalize(centroids, dim=1).T) # (num_samples, num_classes)
-        pesudo_labels = dists.argmin(dim=1)
-        all_output = F.one_hot(pesudo_labels, num_classes).float()
-    
-    sorted_pesudo_labels = pesudo_labels[torch.argsort(all_index)]
-    return sorted_pesudo_labels
+        pseudo_labels = dists.argmax(dim=1)
+
+        pseudo_label_accuracy = (pseudo_labels == all_label).sum() / all_label.size(0)
+        print(f"pseudo_label_accuracy: {pseudo_label_accuracy}")
+
+        all_output = F.one_hot(pseudo_labels, num_classes).float()
+    sorted_pseudo_labels = pseudo_labels[torch.argsort(all_index)]
+    return sorted_pseudo_labels
 
 
 def train_source(train_loader: DataLoader, model: ImageClassifier, optimizer: SGD,
@@ -243,7 +254,7 @@ def train_source(train_loader: DataLoader, model: ImageClassifier, optimizer: SG
             progress.display(i)
 
 
-def train_target(train_loader: DataLoader, pesudo_labels: torch.LongTensor, model: ImageClassifier,
+def train_target(train_loader: DataLoader, pseudo_labels: torch.LongTensor, model: ImageClassifier,
                  optimizer: SGD, lr_scheduler: LambdaLR, epoch: int, args: argparse.Namespace):
     batch_time = AverageMeter('Time', ':5.2f')
     data_time = AverageMeter('Data', ':5.2f')
@@ -262,8 +273,8 @@ def train_target(train_loader: DataLoader, pesudo_labels: torch.LongTensor, mode
     end = time.time()
     for i, (data, index) in enumerate(train_loader):
         # one should never access the target label
-        x, pesudo_label = data[0], pesudo_labels[index]
-        x, pesudo_label = x.to(device), pesudo_label.to(device)
+        x, pseudo_label = data[0], pseudo_labels[index]
+        x, pseudo_label = x.to(device), pseudo_label.to(device)
 
         # measure data loading time
         data_time.update(time.time() - end)
@@ -276,9 +287,9 @@ def train_target(train_loader: DataLoader, pesudo_labels: torch.LongTensor, mode
         # Add logK to obtain positive value
         divergence_loss = np.log(probs.size(1)) - entropy(probs.mean(dim=0, keepdim=True), reduction="mean")
         # No label smoothing here
-        pesudo_label_loss = F.cross_entropy(y, pesudo_label)
+        pseudo_label_loss = F.cross_entropy(y, pseudo_label)
 
-        loss = entropy_loss + divergence_loss + args.trade_off * pesudo_label_loss
+        loss = entropy_loss + divergence_loss + args.trade_off * pseudo_label_loss
         # print(entropy_loss.item(), divergence_loss.item())
 
         losses.update(loss.item(), x.size(0))
@@ -351,7 +362,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--epsilon', default=1e-5, type=float, help='threshold for normalization')
     parser.add_argument('--lb-smooth', default=0.1, type=float, help='Ratio of label smoothing. Source only.')
     parser.add_argument('--trade-off', default=0.3, type=float,
-                        help='the trade-off hyper-parameter for pesudo-label loss')
+                        help='the trade-off hyper-parameter for pseudo-label loss')
     parser.add_argument('-j', '--workers', default=8, type=int, metavar='N',
                         help='number of data loading workers (default: 2)')
     parser.add_argument('--epochs', default=50, type=int, metavar='N',
