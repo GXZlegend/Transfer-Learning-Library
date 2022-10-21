@@ -28,7 +28,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def init_weights(m):
-    pass
     classname = m.__class__.__name__
     if classname.find('Conv2d') != -1 or classname.find('ConvTranspose2d') != -1:
         nn.init.kaiming_uniform_(m.weight)
@@ -109,6 +108,8 @@ def main(args: argparse.Namespace):
         # fix the classifier head
         #######################
         parameters.pop(-1)
+        for v in classifier.head.parameters():
+            v.requires_grad_(False)
     
     optimizer = SGD(parameters, args.lr, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=True)
     lr_scheduler = LambdaLR(optimizer, lambda x: args.lr * (1 + args.lr_gamma * x / (args.epochs * args.iters_per_epoch)) ** (-args.lr_decay))
@@ -194,8 +195,6 @@ def collect_pseudo_labels(val_loader: DataLoader, model: ImageClassifier, args: 
         # print(all_output.sum(dim=0))
         centroids = torch.mm(all_output.T, all_feature) / (all_output.sum(dim=0).unsqueeze(1) + args.epsilon) # (num_classes, feature_dim)
         # cosine similarity
-        from scipy.spatial.distance import cdist
-        # dists_gt = torch.from_numpy(cdist(all_feature.numpy(), centroids.numpy(), "cosine"))
         dists = torch.mm(F.normalize(all_feature, dim=1), F.normalize(centroids, dim=1).T) # (num_samples, num_classes)
         pseudo_labels = dists.argmax(dim=1)
 
@@ -267,7 +266,6 @@ def train_target(train_loader: DataLoader, pseudo_labels: torch.LongTensor, mode
 
     # switch to train mode
     model.train()
-    #######################
     model.head.eval()
 
     end = time.time()
@@ -365,7 +363,7 @@ if __name__ == '__main__':
                         help='the trade-off hyper-parameter for pseudo-label loss')
     parser.add_argument('-j', '--workers', default=8, type=int, metavar='N',
                         help='number of data loading workers (default: 2)')
-    parser.add_argument('--epochs', default=50, type=int, metavar='N',
+    parser.add_argument('--epochs', default=100, type=int, metavar='N',
                         help='number of total epochs to run')
     parser.add_argument('-p', '--print-freq', default=10, type=int,
                         metavar='N', help='print frequency (default: 10)')
