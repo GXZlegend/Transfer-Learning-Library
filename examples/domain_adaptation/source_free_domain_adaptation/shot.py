@@ -28,16 +28,17 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def init_weights(m):
-    classname = m.__class__.__name__
-    if classname.find('Conv2d') != -1 or classname.find('ConvTranspose2d') != -1:
-        nn.init.kaiming_uniform_(m.weight)
-        nn.init.zeros_(m.bias)
-    # elif classname.find('BatchNorm') != -1:
-    #     nn.init.normal_(m.weight, 1.0, 0.02)
+    pass
+    # classname = m.__class__.__name__
+    # if classname.find('Conv2d') != -1 or classname.find('ConvTranspose2d') != -1:
+    #     nn.init.kaiming_uniform_(m.weight)
     #     nn.init.zeros_(m.bias)
-    elif classname.find('Linear') != -1:
-        nn.init.xavier_normal_(m.weight)
-        nn.init.zeros_(m.bias)
+    # # elif classname.find('BatchNorm') != -1:
+    # #     nn.init.normal_(m.weight, 1.0, 0.02)
+    # #     nn.init.zeros_(m.bias)
+    # elif classname.find('Linear') != -1:
+    #     nn.init.xavier_normal_(m.weight)
+    #     nn.init.zeros_(m.bias)
 
 
 def main(args: argparse.Namespace):
@@ -195,8 +196,8 @@ def collect_pseudo_labels(val_loader: DataLoader, model: ImageClassifier, args: 
         # print(all_output.sum(dim=0))
         centroids = torch.mm(all_output.T, all_feature) / (all_output.sum(dim=0).unsqueeze(1) + args.epsilon) # (num_classes, feature_dim)
         # cosine similarity
-        dists = torch.mm(F.normalize(all_feature, dim=1), F.normalize(centroids, dim=1).T) # (num_samples, num_classes)
-        pseudo_labels = dists.argmax(dim=1)
+        similarity = torch.mm(F.normalize(all_feature, dim=1), F.normalize(centroids, dim=1).T) # (num_samples, num_classes)
+        pseudo_labels = similarity.argmax(dim=1)
 
         pseudo_label_accuracy = (pseudo_labels == all_label).sum() / all_label.size(0)
         print(f"pseudo_label_accuracy: {pseudo_label_accuracy}")
@@ -266,7 +267,7 @@ def train_target(train_loader: DataLoader, pseudo_labels: torch.LongTensor, mode
 
     # switch to train mode
     model.train()
-    model.head.eval()
+    # model.head.eval()
 
     end = time.time()
     for i, (data, index) in enumerate(train_loader):
@@ -317,7 +318,7 @@ if __name__ == '__main__':
     parser.add_argument('--domain', help='domain(s) to use', nargs='+')
     parser.add_argument('--val-ratio', type=float, default=0.1,
                         help='the ratio of validation data in the training set for random splitting')
-    parser.add_argument('--train-resizing', type=str, default='default')
+    parser.add_argument('--train-resizing', type=str, default='ran.crop')
     parser.add_argument('--val-resizing', type=str, default='default')
     parser.add_argument('--resize-size', type=int, default=224,
                         help='the image size after resizing')
