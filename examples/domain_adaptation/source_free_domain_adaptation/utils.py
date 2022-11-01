@@ -23,6 +23,7 @@ from tllib.utils.metric import accuracy, ConfusionMatrix
 from tllib.utils.meter import AverageMeter, ProgressMeter
 from tllib.vision.datasets.imagelist import MultipleDomainsDataset
 
+from torch.utils.data import Subset
 
 class IndexedDataset(Dataset[T_co]):
     r"""Wrapping a dataset for indexing.
@@ -94,29 +95,24 @@ def get_single_dataset(dataset_name, root, domain, train_transform, val_transfor
             return MultipleDomainsDataset([dataset(task=task, **kwargs) for task in tasks], tasks,
                                           domain_ids=list(range(start_idx, start_idx + len(tasks))))
 
-        train_dataset = concat_dataset(root=root, tasks=domain, download=True, transform=train_transform,
-                                              start_idx=0)
-        if val_ratio == 0:
-            val_dataset = concat_dataset(root=root, tasks=domain, download=True, transform=val_transform,
-                                         start_idx=0)
-            class_names = train_dataset.datasets[0].classes
-        else:
-            total_size = len(train_dataset)
-            val_size = int(val_ratio * total_size)
-            train_size = total_size - val_size
-            train_dataset, val_dataset = random_split(train_dataset, lengths=[train_size, val_size])
-            for val_domain in val_dataset.dataset.domains:
-                val_domain.transform = val_transform
-            class_names = train_dataset.dataset.datasets[0].classes
+        train_dataset = concat_dataset(root=root, tasks=domain, download=True, transform=train_transform, start_idx=0)
+        val_dataset = concat_dataset(root=root, tasks=domain, download=True, transform=val_transform, start_idx=0)
+        class_names = train_dataset.datasets[0].classes
+        num_classes = len(class_names)
         
+        if val_ratio > 0:
+            indices = torch.randperm(len(train_dataset))
+            offset = int(val_ratio * len(train_dataset))
+            train_dataset, val_dataset = Subset(train_dataset, indices[offset:]), Subset(val_dataset, indices[:offset])
+
         if dataset_name == 'DomainNet':
             test_dataset = concat_dataset(root=root, tasks=domain, split='test', download=True, transform=val_transform,
                                           start_idx=0)
         else:
             test_dataset = val_dataset
-        num_classes = len(class_names)
     else:
         raise NotImplementedError(dataset_name)
+        
     return train_dataset, val_dataset, test_dataset, num_classes, class_names
 
 

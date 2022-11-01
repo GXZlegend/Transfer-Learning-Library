@@ -27,20 +27,6 @@ from tllib.modules.entropy import entropy
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def init_weights(m):
-    pass
-    # classname = m.__class__.__name__
-    # if classname.find('Conv2d') != -1 or classname.find('ConvTranspose2d') != -1:
-    #     nn.init.kaiming_uniform_(m.weight)
-    #     nn.init.zeros_(m.bias)
-    # # elif classname.find('BatchNorm') != -1:
-    # #     nn.init.normal_(m.weight, 1.0, 0.02)
-    # #     nn.init.zeros_(m.bias)
-    # elif classname.find('Linear') != -1:
-    #     nn.init.xavier_normal_(m.weight)
-    #     nn.init.zeros_(m.bias)
-
-
 def main(args: argparse.Namespace):
     logger = CompleteLogger(args.log, args.phase)
     print(args)
@@ -86,13 +72,12 @@ def main(args: argparse.Namespace):
     backbone = utils.get_model(args.arch, pretrain=not args.scratch)
     pool_layer = nn.Identity() if args.no_pool else None
     classifier = ImageClassifier(backbone, num_classes, bottleneck_dim=args.bottleneck_dim,
-                                 pool_layer=pool_layer, finetune=not args.scratch).to(device)
+                                 pool_layer=pool_layer, finetune=not args.scratch)
+    classifier.bottleneck[-1] = nn.Identity()     
+    classifier = classifier.to(device)
 
     if args.wn:
         classifier.head = weight_norm(classifier.head)
-
-    classifier.bottleneck.apply(init_weights)
-    classifier.head.apply(init_weights)
 
     if args.load:
         checkpoint = torch.load(args.load, map_location='cpu')
@@ -107,7 +92,6 @@ def main(args: argparse.Namespace):
     parameters = classifier.get_parameters()
     if args.phase == 'train_target':
         # fix the classifier head
-        #######################
         parameters.pop(-1)
         for v in classifier.head.parameters():
             v.requires_grad_(False)
@@ -200,7 +184,7 @@ def collect_pseudo_labels(val_loader: DataLoader, model: ImageClassifier, args: 
         pseudo_labels = similarity.argmax(dim=1)
 
         pseudo_label_accuracy = (pseudo_labels == all_label).sum() / all_label.size(0)
-        print(f"pseudo_label_accuracy: {pseudo_label_accuracy}")
+        # print(f"pseudo_label_accuracy: {pseudo_label_accuracy}")
 
         all_output = F.one_hot(pseudo_labels, num_classes).float()
     sorted_pseudo_labels = pseudo_labels[torch.argsort(all_index)]
