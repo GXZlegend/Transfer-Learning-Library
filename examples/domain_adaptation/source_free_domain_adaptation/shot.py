@@ -16,6 +16,7 @@ from torch.utils.data import DataLoader
 from torch.nn.utils import weight_norm
 
 import utils
+from tllib.modules import Classifier
 from tllib.alignment.dann import ImageClassifier
 from tllib.utils.metric import accuracy
 from tllib.utils.meter import AverageMeter, ProgressMeter
@@ -25,6 +26,38 @@ from tllib.modules.loss import LabelSmoothSoftmaxCEV1
 from tllib.modules.entropy import entropy
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+class SHOTImageClassifier(Classifier):
+    """
+    Classifier for SHOT.
+    """
+
+    def __init__(self, backbone, num_classes, bottleneck_dim, finetune=True, pool_layer=None):
+        bottleneck = nn.Sequential(
+            nn.Linear(backbone.out_features, bottleneck_dim),
+            nn.BatchNorm1d(bottleneck_dim)
+        )
+        super(SHOTImageClassifier, self).__init__(self, num_classes, bottleneck, bottleneck_dim, head=None, finetune=finetune, pool_layer=pool_layer)
+        self.head = weight_norm(self.head)
+    
+    def forward(self, x, return_feature=False):
+        f = self.pool_layer(self.backbone(x))
+        f = self.bottleneck(f)
+        predictions = self.head(f)
+        if return_feature:
+            return predictions, f
+        else:
+            return predictions
+    
+    def get_parameters(self, base_lr=1, freeze_head=False):
+        params = [
+            {"params": self.backbone.parameters(), "lr": 0.1 * base_lr if self.finetune else 1.0 * base_lr},
+            {"params": self.bottleneck.parameters(), "lr": 1.0 * base_lr},
+        ]
+        if not freeze_head:
+            params.append({"params": self.head.parameters(), "lr": 1.0 * base_lr})
+        return params
 
 
 def main(args: argparse.Namespace):
@@ -53,15 +86,14 @@ def main(args: argparse.Namespace):
     print("train_transform: ", train_transform)
     print("val_transform: ", val_transform)
 
-    train_dataset, val_dataset, test_dataset, num_classes, args.class_names = \
-        utils.get_single_dataset(args.data, args.root, args.domain, train_transform, val_transform, args.val_ratio)
+    train_dataset, val_dataset, test_dataset, args.num_classes, args.class_names = \
+        utils.get_dataset(args.data, args.root, args.domain, train_transform, val_transform, args.val_ratio)
     # create indexed dataset in train_target phase
     if args.phase == 'train_target':
         train_dataset = utils.IndexedDataset(train_dataset)
-        val_dataset = utils.IndexedDataset(val_dataset)
-    # should not drop last in train_target phase
+        
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size,
-                              shuffle=True, num_workers=args.workers, drop_last=False)
+                              shuffle=True, num_workers=args.workers)
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
 
@@ -71,30 +103,21 @@ def main(args: argparse.Namespace):
     print("=> using model '{}'".format(args.arch))
     backbone = utils.get_model(args.arch, pretrain=not args.scratch)
     pool_layer = nn.Identity() if args.no_pool else None
-    classifier = ImageClassifier(backbone, num_classes, bottleneck_dim=args.bottleneck_dim,
-                                 pool_layer=pool_layer, finetune=not args.scratch)
-    classifier.bottleneck[-1] = nn.Identity()     
-    classifier = classifier.to(device)
+    classifier = SHOTImageClassifier(backbone, args.num_classes, bottleneck_dim=args.bottleneck_dim,
+                                     pool_layer=pool_layer, finetune=not args.scratch).to(device)
 
-    if args.wn:
-        classifier.head = weight_norm(classifier.head)
-
-    if args.load:
-        checkpoint = torch.load(args.load, map_location='cpu')
+    if args.load_pretrained_model:
+        checkpoint = torch.load(args.load_pretrained_model, map_location='cpu')
         classifier.load_state_dict(checkpoint)
     
-    if not args.load and not args.phase in ['train_source', 'train_target']:
+    if not args.load_pretrained_model and not args.phase in ['train_source', 'train_target']:
         # resume from the best checkpoint
         checkpoint = torch.load(logger.get_checkpoint_path('best'), map_location='cpu')
         classifier.load_state_dict(checkpoint)
 
     # define optimizer and lr scheduler
-    parameters = classifier.get_parameters()
-    if args.phase == 'train_target':
-        # fix the classifier head
-        parameters.pop(-1)
-        for v in classifier.head.parameters():
-            v.requires_grad_(False)
+    freeze_head = True if args.phase == 'train_target' else False
+    parameters = classifier.get_parameters(freeze_head=freeze_head)
     
     optimizer = SGD(parameters, args.lr, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=True)
     lr_scheduler = LambdaLR(optimizer, lambda x: args.lr * (1 + args.lr_gamma * x / (args.epochs * args.iters_per_epoch)) ** (-args.lr_decay))
@@ -148,47 +171,40 @@ def main(args: argparse.Namespace):
     logger.close()
 
 
-def collect_pseudo_labels(val_loader: DataLoader, model: ImageClassifier, args: argparse.Namespace):
+def collect_pseudo_labels(val_loader: DataLoader, model: SHOTImageClassifier, args: argparse.Namespace):
     model.eval()
-    model.training = True # For feature returning
     feature_list = []
     output_list = []
     label_list = []
-    index_list = []
     with torch.no_grad():
-        for data, index in val_loader:
+        for data, in val_loader:
             x, label = data[:2]
             x = x.to(device)
-            y, f = model(x)
-            feature_list.append(f.detach().cpu())
-            output_list.append(y.detach().cpu())
+            y, f = model(x, return_feature=True)
+            feature_list.append(f.cpu())
+            output_list.append(y.cpu())
             label_list.append(label)
-            index_list.append(index)
-    model.training = False
     all_feature = torch.cat(feature_list)
     all_output = torch.cat(output_list)
     all_output = all_output.softmax(dim=1)
     all_label = torch.cat(label_list)
-    all_index = torch.cat(index_list)
-    num_classes = all_output.size(1)
 
-    # Why?
+    # Laplacian smoothing
     all_feature = torch.cat((all_feature, torch.ones(all_feature.size(0), 1)), 1)
-    all_feature = (all_feature.t() / torch.norm(all_feature, dim=1)).t()
+    all_feature = (all_feature.T / torch.norm(all_feature, dim=1)).T
     
     for _ in range(2):
-        # print(all_output.sum(dim=0))
         centroids = torch.mm(all_output.T, all_feature) / (all_output.sum(dim=0).unsqueeze(1) + args.epsilon) # (num_classes, feature_dim)
         # cosine similarity
         similarity = torch.mm(F.normalize(all_feature, dim=1), F.normalize(centroids, dim=1).T) # (num_samples, num_classes)
         pseudo_labels = similarity.argmax(dim=1)
 
         pseudo_label_accuracy = (pseudo_labels == all_label).sum() / all_label.size(0)
-        # print(f"pseudo_label_accuracy: {pseudo_label_accuracy}")
+        print(f"pseudo_label_accuracy: {pseudo_label_accuracy}")
 
-        all_output = F.one_hot(pseudo_labels, num_classes).float()
-    sorted_pseudo_labels = pseudo_labels[torch.argsort(all_index)]
-    return sorted_pseudo_labels
+        all_output = F.one_hot(pseudo_labels, args.num_classes).float()
+    
+    return pseudo_labels
 
 
 def train_source(train_loader: DataLoader, model: ImageClassifier, optimizer: SGD,
@@ -215,7 +231,7 @@ def train_source(train_loader: DataLoader, model: ImageClassifier, optimizer: SG
         data_time.update(time.time() - end)
 
         # compute output
-        y, _ = model(x)
+        y = model(x)
 
         loss = criterion(y, labels)
 
@@ -242,16 +258,18 @@ def train_target(train_loader: DataLoader, pseudo_labels: torch.LongTensor, mode
                  optimizer: SGD, lr_scheduler: LambdaLR, epoch: int, args: argparse.Namespace):
     batch_time = AverageMeter('Time', ':5.2f')
     data_time = AverageMeter('Data', ':5.2f')
-    losses = AverageMeter('Loss', ':6.2f')
+    entropy_losses = AverageMeter('Entropy Loss', '6.2f')
+    divergence_losses = AverageMeter('Divergence Loss', '6.2f')
+    pseudo_label_losses = AverageMeter('Pesudo Label Loss', '6.2f')
+    total_losses = AverageMeter('Total Loss', ':6.2f')
     # cls_accs = AverageMeter('Cls Acc', ':3.1f')
     progress = ProgressMeter(
         args.iters_per_epoch,
-        [batch_time, data_time, losses],
+        [batch_time, data_time, entropy_losses, divergence_losses, pseudo_label_losses, total_losses],
         prefix="Epoch: [{}]".format(epoch))
 
     # switch to train mode
     model.train()
-    # model.head.eval()
 
     end = time.time()
     for i, (data, index) in enumerate(train_loader):
@@ -263,23 +281,25 @@ def train_target(train_loader: DataLoader, pseudo_labels: torch.LongTensor, mode
         data_time.update(time.time() - end)
 
         # compute output
-        y, _ = model(x)
+        y = model(x)
         probs = torch.softmax(y, dim=1)
 
         entropy_loss = entropy(probs, reduction="mean")
         # Add logK to obtain positive value
-        divergence_loss = np.log(probs.size(1)) - entropy(probs.mean(dim=0, keepdim=True), reduction="mean")
+        divergence_loss = np.log(args.num_classes) - entropy(probs.mean(dim=0, keepdim=True), reduction="mean")
         # No label smoothing here
         pseudo_label_loss = F.cross_entropy(y, pseudo_label)
 
-        loss = entropy_loss + divergence_loss + args.trade_off * pseudo_label_loss
-        # print(entropy_loss.item(), divergence_loss.item())
+        total_loss = entropy_loss + divergence_loss + args.trade_off * pseudo_label_loss
 
-        losses.update(loss.item(), x.size(0))
+        entropy_losses.update(entropy_loss, x.size(0))
+        divergence_losses.update(divergence_loss, x.size(0))
+        pseudo_label_losses.update(pseudo_label_loss, x.size(0))
+        total_losses.update(total_loss.item(), x.size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
-        loss.backward()
+        total_loss.backward()
         optimizer.step()
         lr_scheduler.step()
 
@@ -292,7 +312,7 @@ def train_target(train_loader: DataLoader, pseudo_labels: torch.LongTensor, mode
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='DANN for Unsupervised Domain Adaptation')
+    parser = argparse.ArgumentParser(description='SHOT for Source-Free Domain Adaptation')
     # dataset parameters
     parser.add_argument('root', metavar='DIR',
                         help='root path of dataset')
@@ -326,9 +346,8 @@ if __name__ == '__main__':
                         help='Dimension of bottleneck')
     parser.add_argument('--no-pool', action='store_true',
                         help='no pool layer after the feature extractor.')
-    parser.add_argument('--wn', action='store_true', help='weight normalization for the head layer.')
     parser.add_argument('--scratch', action='store_true', help='whether train from scratch.')
-    parser.add_argument('--load', default=None, type=str, help='Directory to load a model. Train only')
+    parser.add_argument('--load-pretrained-model', default=None, type=str, help='Directory to load a model. Train only')
     # training parameters
     parser.add_argument('-b', '--batch-size', default=64, type=int,
                         metavar='N',
@@ -344,9 +363,9 @@ if __name__ == '__main__':
                         dest='weight_decay')
     parser.add_argument('-e', '--epsilon', default=1e-5, type=float, help='threshold for normalization')
     parser.add_argument('--lb-smooth', default=0.1, type=float, help='Ratio of label smoothing. Source only.')
-    parser.add_argument('--trade-off', default=0.3, type=float,
+    parser.add_argument('--pseudo-label-trade-off', default=0.3, type=float,
                         help='the trade-off hyper-parameter for pseudo-label loss')
-    parser.add_argument('-j', '--workers', default=8, type=int, metavar='N',
+    parser.add_argument('-j', '--workers', default=2, type=int, metavar='N',
                         help='number of data loading workers (default: 2)')
     parser.add_argument('--epochs', default=100, type=int, metavar='N',
                         help='number of total epochs to run')
@@ -356,7 +375,7 @@ if __name__ == '__main__':
                         help='seed for initializing training. ')
     parser.add_argument('--per-class-eval', action='store_true',
                         help='whether output per-class accuracy during evaluation')
-    parser.add_argument("--log", type=str, default='shot',
+    parser.add_argument("--log", type=str, default='logs',
                         help="Where to save logs, checkpoints and debugging images.")
     parser.add_argument("--phase", type=str, default='train_source', choices=['train_source', 'train_target', 'test'],
                         help="When phase is 'test', only test the model."
