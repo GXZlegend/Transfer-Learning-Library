@@ -1,6 +1,6 @@
 """
-@author: Junguang Jiang, Baixu Chen
-@contact: JiangJunguang1123@outlook.com, cbx_99_hasta@outlook.com
+@author: Junguang Jiang, Baixu Chen, Xingzhuo Guo
+@contact: JiangJunguang1123@outlook.com, cbx_99_hasta@outlook.com, gxz19@mails.tsinghua.edu.cn
 """
 import sys
 import os.path as osp

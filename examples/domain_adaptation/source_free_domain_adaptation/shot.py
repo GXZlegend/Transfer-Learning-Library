@@ -1,3 +1,7 @@
+"""
+@author: Xingzhuo Guo
+@contact: gxz19@mails.tsinghua.edu.cn
+"""
 import random
 import time
 import warnings
@@ -200,7 +204,7 @@ def collect_pseudo_labels(val_loader: DataLoader, model: SHOTImageClassifier, ar
         pseudo_labels = similarity.argmax(dim=1)
 
         pseudo_label_accuracy = (pseudo_labels == all_label).sum() / all_label.size(0)
-        print(f"pseudo_label_accuracy: {pseudo_label_accuracy}")
+        print(f"Accuracy of Pseudo Labels: {pseudo_label_accuracy}")
 
         all_output = F.one_hot(pseudo_labels, args.num_classes).float()
     
@@ -262,10 +266,10 @@ def train_target(train_loader: DataLoader, pseudo_labels: torch.LongTensor, mode
     divergence_losses = AverageMeter('Divergence Loss', '6.2f')
     pseudo_label_losses = AverageMeter('Pesudo Label Loss', '6.2f')
     total_losses = AverageMeter('Total Loss', ':6.2f')
-    # cls_accs = AverageMeter('Cls Acc', ':3.1f')
+    pseudo_cls_accs = AverageMeter('Pseudo Cls Acc', ':3.1f')
     progress = ProgressMeter(
         args.iters_per_epoch,
-        [batch_time, data_time, entropy_losses, divergence_losses, pseudo_label_losses, total_losses],
+        [batch_time, data_time, entropy_losses, divergence_losses, pseudo_label_losses, total_losses, pseudo_cls_accs],
         prefix="Epoch: [{}]".format(epoch))
 
     # switch to train mode
@@ -289,13 +293,15 @@ def train_target(train_loader: DataLoader, pseudo_labels: torch.LongTensor, mode
         divergence_loss = np.log(args.num_classes) - entropy(probs.mean(dim=0, keepdim=True), reduction="mean")
         # No label smoothing here
         pseudo_label_loss = F.cross_entropy(y, pseudo_label)
+        pseudo_cls_acc = accuracy(y, pseudo_label)[0]
 
         total_loss = entropy_loss + divergence_loss + args.trade_off * pseudo_label_loss
 
-        entropy_losses.update(entropy_loss, x.size(0))
-        divergence_losses.update(divergence_loss, x.size(0))
-        pseudo_label_losses.update(pseudo_label_loss, x.size(0))
+        entropy_losses.update(entropy_loss.item(), x.size(0))
+        divergence_losses.update(divergence_loss.item(), x.size(0))
+        pseudo_label_losses.update(pseudo_label_loss.item(), x.size(0))
         total_losses.update(total_loss.item(), x.size(0))
+        pseudo_cls_accs.update(pseudo_cls_acc.item(), x.size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
